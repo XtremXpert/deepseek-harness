@@ -547,7 +547,7 @@ it('requires Office skill bodies and helpers in the published payload', () => {
 })
 
 it('requires the local speech worker and locked runtime in the published payload', () => {
-  const dir = 'packages/experimental/speech-to-text-sensevoice'
+  const dir = 'packages/experimental/speech-to-text-local'
   const manifest = JSON.parse(readFileSync(new URL(`../${dir}/package.json`, import.meta.url), 'utf8')) as WorkspaceManifest['manifest']
   expect(checkWorkspaceManifest({ dir, manifest })).toEqual([])
   for (const omitted of ['lib/worker.js', 'runtime/assets.json']) {

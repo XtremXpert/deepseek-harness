@@ -121,9 +121,10 @@ export default class SpeechToText extends Service {
    * @returns one detached complete observation.
    */
   snapshot(): SpeechSnapshot {
+    const language = this.config.language.get()
     return { providers: [...this.providers.values()].map(({ provider }) => ({ ...provider.info,
-      preparation: provider.preparation?.snapshot() ?? { phase: 'ready' },
-    })), selection: { providerId: this.config.defaultProvider.get() as SpeechProviderId, language: this.config.language.get() } }
+      preparation: provider.preparation?.snapshot(language) ?? { phase: 'ready' },
+    })), selection: { providerId: this.config.defaultProvider.get() as SpeechProviderId, language } }
   }
 
   /**
@@ -151,14 +152,14 @@ export default class SpeechToText extends Service {
   }
 
   /**
-   * Start or join provider-owned preparation.
+   * Start or join provider-owned preparation for the selected language.
    * @param id - exact registered provider identity.
    * @param options - task-local source selection validated by the provider.
    */
   prepare(id: SpeechProviderId, options?: SpeechPreparationOptions): void {
     const registration = this.providers.get(id)
     if (!registration) throw new Error(`Speech provider is unavailable: ${id}`)
-    registration.provider.preparation?.prepare(options)
+    registration.provider.preparation?.prepare(this.config.language.get(), options)
   }
 
   /**

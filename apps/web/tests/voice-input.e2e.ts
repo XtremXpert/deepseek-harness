@@ -28,7 +28,7 @@ it.skipIf(webSnapshotMode() === 'record')('guides voice setup, records from stan
     }
   })
   const overlay = join(scratch, 'voice.patch.yml')
-  await writeFile(overlay, '- id: speech-to-text-sensevoice\n  disabled: true\n')
+  await writeFile(overlay, '- id: speech-to-text-local\n  disabled: true\n')
   const prompt = fixtureUserPrompts(await readFile(fixture, 'utf8'))[0]!
   const prefix = 'Use the bash tool to '
   const scaffold = await launchWebScaffold({ profile: { packages: [{ dir: bundle, enabled: true }] },
@@ -44,7 +44,7 @@ it.skipIf(webSnapshotMode() === 'record')('guides voice setup, records from stan
   const readinessListeners = new Set<() => void>()
   await scaffold.ctx.plugin({ inject: ['speechToText'], apply(ctx) {
     ctx.effect(() => ctx.speechToText.register({
-      info: { id: 'sensevoice-local' as SpeechProviderId, name: 'Recorded recognizer', location: 'host-local', languages: ['auto'] },
+      info: { id: 'local' as SpeechProviderId, name: 'Recorded recognizer', location: 'host-local', languages: ['auto'] },
       preparation: {
         snapshot: () => preparation,
         subscribe: (listener) => { readinessListeners.add(listener); return () => { readinessListeners.delete(listener) } },

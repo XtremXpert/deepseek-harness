@@ -3532,7 +3532,7 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
       },
       {
         signature: 'prepare(id: SpeechProviderId, options?: SpeechPreparationOptions): void',
-        description: 'Start or join provider-owned preparation.',
+        description: 'Start or join provider-owned preparation for the selected language.',
         parameters: [{ name: 'id', description: 'exact registered provider identity.' }, { name: 'options', description: 'task-local source selection validated by the provider.' }],
       },
       {
@@ -9033,7 +9033,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'SpeechPreparation',
-    declaration: 'export interface SpeechPreparation {\n    snapshot(): SpeechPreparationState;\n    subscribe(listener: () => void): () => void;\n    prepare(options?: SpeechPreparationOptions): void;\n    cancel(): Promise<void>;\n}',
+    declaration: 'export interface SpeechPreparation {\n    snapshot(language: string): SpeechPreparationState;\n    subscribe(listener: () => void): () => void;\n    prepare(language: string, options?: SpeechPreparationOptions): void;\n    cancel(): Promise<void>;\n}',
   },
   {
     name: 'SpeechPreparationOptions',

@@ -2,9 +2,9 @@
     - id: speech-to-text
       name: '@deepseek-ai/dsh-experimental-speech-to-text'
       config:
-        defaultProvider: sensevoice-local
-    - id: speech-to-text-sensevoice
-      name: '@deepseek-ai/dsh-experimental-speech-to-text-sensevoice'
+        defaultProvider: local
+    - id: speech-to-text-local
+      name: '@deepseek-ai/dsh-experimental-speech-to-text-local'
       config:
         dataRoot: !!js dshHomePath('speech-to-text', 'sensevoice')
     - id: api-speech-to-text

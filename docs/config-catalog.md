@@ -1340,13 +1340,13 @@ export interface Config {
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-experimental-speech-to-text -->
 
-<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-experimental-speech-to-text-sensevoice -->
-<a id="deepseek-aidsh-experimental-speech-to-text-sensevoice"></a>
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-experimental-speech-to-text-local -->
+<a id="deepseek-aidsh-experimental-speech-to-text-local"></a>
 
-## `@deepseek-ai/dsh-experimental-speech-to-text-sensevoice`
+## `@deepseek-ai/dsh-experimental-speech-to-text-local`
 
 - `inject`: `speechToText` · `subprocess`
-- `source`: [`packages/experimental/speech-to-text-sensevoice/src/config.ts:6`](../packages/experimental/speech-to-text-sensevoice/src/config.ts)
+- `source`: [`packages/experimental/speech-to-text-local/src/config.ts:6`](../packages/experimental/speech-to-text-local/src/config.ts)
 
 ```ts config-catalog
 /** Local runtime, inference, and retention settings. */
@@ -1357,6 +1357,8 @@ export interface Config {
   dataRoot: string
   /** Existing directory containing the selected ONNX model and tokens.txt; omission downloads verified files. */
   modelDirectory?: string | undefined
+  /** Existing directory containing the Whisper encoder, decoder and tokens; omission downloads verified files. */
+  whisperModelDirectory?: string | undefined
   /** Existing Silero VAD ONNX file; omission downloads the verified model. */
   vadModelPath?: string | undefined
   /** Weight precision; INT8 minimizes first-use download and model storage. */
@@ -1399,7 +1401,7 @@ export interface Config {
   progressIntervalMs: number
 }
 ```
-<!-- END GENERATED config-catalog:@deepseek-ai/dsh-experimental-speech-to-text-sensevoice -->
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-experimental-speech-to-text-local -->
 
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-experimental-subagent-oar -->
 <a id="deepseek-aidsh-experimental-subagent-oar"></a>

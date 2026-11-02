@@ -85,16 +85,21 @@ export interface SpeechPreparationOptions {
 
 /** Optional resource preparation controls. Providers without them are immediately usable. */
 export interface SpeechPreparation {
-  /** @returns the latest Host-owned state. */
-  snapshot(): SpeechPreparationState
+  /**
+   * Read the readiness of the model that serves one language.
+   * @param language - selected language hint; providers serve every advertised hint.
+   * @returns the latest Host-owned state for that language.
+   */
+  snapshot(language: string): SpeechPreparationState
   /** @param listener - state invalidation callback. @returns subscription disposer. */
   subscribe(listener: () => void): () => void
   /**
-   * Start or join the current preparation task; page and transport lifetimes do not own it.
+   * Start or join the current preparation task for one language; page and transport lifetimes do not own it.
+   * @param language - selected language hint whose model is prepared.
    * @param options - task-local download selection; providers reject changing the source of active work.
    */
-  prepare(options?: SpeechPreparationOptions): void
-  /** Cancel preparation. @returns after its resources settle. */
+  prepare(language: string, options?: SpeechPreparationOptions): void
+  /** Cancel preparation for every language. @returns after its resources settle. */
   cancel(): Promise<void>
 }
 

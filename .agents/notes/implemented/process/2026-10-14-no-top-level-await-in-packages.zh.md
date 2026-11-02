@@ -6,12 +6,12 @@ Status: implemented
 
 ## 问题
 
-[speech-to-text-sensevoice](../../../../packages/experimental/speech-to-text-sensevoice/README.zh.md) 的子进程入口 `src/worker.ts` 曾在模块顶层 `await startRecognitionServer(...)`。顶层 await 让模块求值变成异步：导入方的求值被它挂住，入口的失败也变成模块加载失败，而不是入口自己显式处理的错误。这个文件同时是包的 `./worker` 导出，浏览器 Preview 的模块加载器按 CommonJS 包装模块体，遇到顶层 await 会拒绝打包，voice-input-bundle 因此无法进入镜像。仓库里当时没有任何门禁阻止这种写法；全仓扫描时，除 bin 外还有另外两处：ssh 的 `src/helper-entry.ts`（`./helper` 导出的目标）和 inspector 的 `src/worker/entry.ts`（worker_threads 入口）。
+[speech-to-text-local](../../../../packages/experimental/speech-to-text-local/README.zh.md) 的子进程入口 `src/worker.ts` 曾在模块顶层 `await startRecognitionServer(...)`。顶层 await 让模块求值变成异步：导入方的求值被它挂住，入口的失败也变成模块加载失败，而不是入口自己显式处理的错误。这个文件同时是包的 `./worker` 导出，浏览器 Preview 的模块加载器按 CommonJS 包装模块体，遇到顶层 await 会拒绝打包，voice-input-bundle 因此无法进入镜像。仓库里当时没有任何门禁阻止这种写法；全仓扫描时，除 bin 外还有另外两处：ssh 的 `src/helper-entry.ts`（`./helper` 导出的目标）和 inspector 的 `src/worker/entry.ts`（worker_threads 入口）。
 
 ## 决策
 
 - 入口模块用显式 `async function main()`：
-  - sensevoice：就绪前失败时只把错误消息写到 stderr，消息写完后以退出码 1 退出（在写入回调里调用 `process.exit(1)`，否则已加载的原生识别器会让进程一直存活）；stdout 只有一行 `{"port":N}`，Host 把它解析为就绪信号。
+  - local：就绪前失败时只把错误消息写到 stderr，消息写完后以退出码 1 退出（在写入回调里调用 `process.exit(1)`，否则已加载的原生识别器会让进程一直存活）；stdout 只有一行 `{"port":N}`，Host 把它解析为就绪信号。
   - ssh helper：`main()` 承载 helper 的 try/catch/finally 和信号处理；每个失败都以 `dsh-ssh-sandbox:` 前缀写到 stderr，退出码为 127。
   - inspector worker：同步启动部分留在模块顶层，异步部分在 `main()` 里运行，失败时先发 failure 帧再 stop。
 - 门禁 [verify-no-top-level-await](../../../../scripts/verify-no-top-level-await.ts)：
@@ -36,10 +36,10 @@ Status: implemented
 这一取舍的代价：
 
 - 第三方包和 `apps/` 不在范围内；页面引导脚本 `apps/web/src/preview.ts` 使用顶层 await。
-- sensevoice 启动失败的诊断只有错误消息，不带堆栈。
+- local 启动失败的诊断只有错误消息，不带堆栈。
 
 ## 测试
 
-- [verify-no-top-level-await.spec.ts](../../../../scripts/verify-no-top-level-await.spec.ts) 锁定每一种纳入和排除的形式、语料防护和当前的排除清单；[run-gates.spec.ts](../../../../scripts/run-gates.spec.ts) 锁定门禁的注册。若上述三个入口的异步启动放在模块顶层，门禁报出 4 处（sensevoice 1 处、ssh 1 处、inspector 2 处）并失败。
-- [worker-entry.spec.ts](../../../../packages/experimental/speech-to-text-sensevoice/tests/worker-entry.spec.ts) 启动 sensevoice 入口，锁定就绪前失败时退出码为 1、stdout 为空、stderr 给出原因且不带堆栈。
+- [verify-no-top-level-await.spec.ts](../../../../scripts/verify-no-top-level-await.spec.ts) 锁定每一种纳入和排除的形式、语料防护和当前的排除清单；[run-gates.spec.ts](../../../../scripts/run-gates.spec.ts) 锁定门禁的注册。若上述三个入口的异步启动放在模块顶层，门禁报出 4 处（local 1 处、ssh 1 处、inspector 2 处）并失败。
+- [worker-entry.spec.ts](../../../../packages/experimental/speech-to-text-local/tests/worker-entry.spec.ts) 启动 local 入口，锁定就绪前失败时退出码为 1、stdout 为空、stderr 给出原因且不带堆栈。
 - [helper-boundaries.spec.ts](../../../../packages/ssh/ssh/tests/helper-boundaries.spec.ts) 启动 ssh helper 入口，[integration.host.spec.ts](../../../../packages/experimental/inspector/tests/integration.host.spec.ts) 经 `startInspector` 启动 inspector Worker；没有 spec 触发 inspector worker 入口的启动失败帧。

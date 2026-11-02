@@ -25,9 +25,9 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用此包
 
-通过[语音输入 Bundle](../voice-input-bundle/README.zh.md)加载，或组合此服务、Provider 与消费者。`defaultProvider` 为必填项，选择确切的注册 id；Bundle 提供 `sensevoice-local`。`language` 提供省略的语言提示。缺失或重复的 Provider 会明确报错。
+通过[语音输入 Bundle](../voice-input-bundle/README.zh.md)加载，或组合此服务、Provider 与消费者。`defaultProvider` 为必填项，选择确切的注册 id；Bundle 提供 `local`。`language` 提供省略的语言提示。缺失或重复的 Provider 会明确报错。
 
-提供方通过 `downloadSources` 公布准备阶段可用的源。`prepare(id, options)` 为单次任务转发可选的 `downloadSource`；提供方校验选择，并拒绝在准备期间改源。省略时沿用提供方策略。下载源选择不属于持久化的识别偏好。
+提供方通过 `downloadSources` 公布准备阶段可用的源。`prepare(id, options)` 为所选语言模型的一次任务转发可选的 `downloadSource`；提供方校验选择，并拒绝在准备期间改源。准备按语言划分：`SpeechPreparation.prepare(language, options)` 与 `snapshot(language)` 针对服务单一语言的模型，本服务会把当前所选语言传给两者。省略时沿用提供方策略。下载源选择不属于持久化的识别偏好。
 
 -----
 

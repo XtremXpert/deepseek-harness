@@ -6,4 +6,4 @@
     - id: speech-to-text
       name: cordis:speech
       config:
-        defaultProvider: sensevoice-local
+        defaultProvider: local

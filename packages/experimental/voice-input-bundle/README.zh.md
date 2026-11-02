@@ -9,7 +9,7 @@ kind: "package-bundle"
 
 ## 概述
 
-此可选 Bundle 组合语音服务定义、本地 SenseVoice Provider、带认证的 Remote 与浏览器麦克风控件。随包配置默认禁用。
+此可选 Bundle 组合语音服务定义、本地 SenseVoice 与 Whisper Provider、带认证的 Remote 与浏览器麦克风控件。随包配置默认禁用。
 
 ## 目录
 

@@ -839,7 +839,7 @@ const SERVICE_ROLES: ServiceRole[] = [
     pkg: 'experimental-speech-to-text',
     title: 'Experimental speech recognition providers',
     mode: 'seam',
-    implementations: ['experimental-speech-to-text-sensevoice'],
+    implementations: ['experimental-speech-to-text-local'],
     consumers: ['experimental-api-speech-to-text'],
     note: 'Routes explicit recognizers; the browser uses the authenticated Remote and keeps transcripts in the draft until submission.',
   },

@@ -2,11 +2,13 @@
 
 [English](voice-input.md) | 中文
 
-实验性语音识别包含三个角色：[服务定义](../../packages/experimental/speech-to-text/README.zh.md)路由具名 Provider，[SenseVoice Provider](../../packages/experimental/speech-to-text-sensevoice/README.zh.md)拥有本地推理，[Remote 消费者](../../packages/experimental/api-speech-to-text/README.zh.md)服务浏览器。[可选 Bundle](../../packages/experimental/voice-input-bundle/README.zh.md)将它们与麦克风 UI 组合。
+实验性语音识别包含三个角色：[服务定义](../../packages/experimental/speech-to-text/README.zh.md)路由具名 Provider，[本地 Provider](../../packages/experimental/speech-to-text-local/README.zh.md)负责 SenseVoice 与 Whisper 两个模型家族的本地推理，[Remote 消费者](../../packages/experimental/api-speech-to-text/README.zh.md)服务浏览器。[可选 Bundle](../../packages/experimental/voice-input-bundle/README.zh.md)将它们与麦克风 UI 组合。
 
 ## Provider 选择
 
 `SpeechProviderId` 为注册标识添加类型品牌。`SpeechProviderInfo` 携带显示名称、支持的 `languages` 语言提示及 `host-local` 或 `cloud` 处理位置。`SpeechRequest` 包含 WAV 字节和可选的 Provider、语言选择；`resolve()` 生成捕获一个 Provider 实例的 `SpeechSpec`。缺失的 Provider 或不支持的语言会报错；替换或撤销会使已解析的任务失效。音频不会回退到其他 Provider。
+
+每个 Provider 会选择识别所请求语言的模型：本地 Provider 对 `auto`、`zh`、`yue`、`en`、`ja` 和 `ko` 使用 SenseVoice，对 `fr`、`de`、`es`、`pt` 和 `ru` 使用 Whisper。
 
 `SpeechProvider.transcribe()` 接收完整的 `SpeechInput` 与 `AbortSignal`。`Transcript` 返回纯文本 `text`、`audioSeconds` 和 `inferenceSeconds`。Provider 响应取消，并在注销完成前结束其任务。本地 Provider 串行执行调用、限制队列，并独立于 Session 管理工作进程生命周期。
 
@@ -18,9 +20,9 @@
 
 ## 准备与设置
 
-`SpeechProviderInfo.downloadSources` 公布准备阶段的源。`SpeechPreparationOptions.downloadSource` 为单次任务选择一个源；省略时保留提供方策略。SenseVoice 校验公布的选项，固定使用手动指定的源而不回退，并拒绝在准备期间改源。UI 为当前卡片中的重试保留选择，但不会将其保存为识别偏好。
+`SpeechProviderInfo.downloadSources` 公布准备阶段的源。`SpeechPreparationOptions.downloadSource` 为单次任务选择一个源；省略时保留提供方策略。本地 Provider 校验公布的选项，固定使用手动指定的源而不回退，并拒绝在准备期间改源。UI 为当前卡片中的重试保留选择，但不会将其保存为识别偏好。
 
-Host Provider 在页面和 Session 变化期间拥有同一个准备任务。Client 在输入框、安装引导弹窗、Bundle 详情之间共享一份 `follow()` 订阅。可选 `SpeechSetupEstimate` 元数据提供各 Provider 的资源预期，与实测进度分开。`SpeechPreparationStepKind` 标识有序资源操作；`SpeechPreparationStep` 记录各步骤状态与开始时间。完整 `SpeechPreparationState` 在取消或失败后保留这些步骤。折叠 UI 显示当前操作，展开后列出所有步骤，仅进行中步骤显示字节进度或等待时间。关闭观察者不会取消准备。已校验文件在重试及空闲进程回收后继续复用。
+`SpeechPreparation` 按语言工作：`prepare(language)` 与 `snapshot(language)` 针对服务该语言的模型，Service Definition 会把当前所选语言传给两者，因此承载多个模型的 Provider 按语言报告就绪状态。准备仍由 Provider 拥有并跨页面与 Session 变化；每个模型家族各有一个任务。Client 在输入框、安装引导弹窗、Bundle 详情之间共享一份 `follow()` 订阅。可选 `SpeechSetupEstimate` 元数据提供各 Provider 的资源预期，与实测进度分开。`SpeechPreparationStepKind` 标识有序资源操作；`SpeechPreparationStep` 记录各步骤状态与开始时间。完整 `SpeechPreparationState` 在取消或失败后保留这些步骤。折叠 UI 显示当前操作，展开后列出所有步骤，仅进行中步骤显示字节进度或等待时间。关闭观察者不会取消准备。已校验文件在重试及空闲进程回收后继续复用。
 
 准备失败时可包含 `SpeechDownloadFailure`，提供文件、下载源、原因分类以及可选错误码或 HTTP 状态。Client 将恢复建议本地化；原始下载错误留在 Host。
 
@@ -131,7 +133,7 @@ snapshot(): SpeechSnapshot
 async configure(patch: SpeechSelectionPatch): Promise<void>
 
 /**
- * Start or join provider-owned preparation.
+ * Start or join provider-owned preparation for the selected language.
  * @param id - exact registered provider identity.
  * @param options - task-local source selection validated by the provider.
  */

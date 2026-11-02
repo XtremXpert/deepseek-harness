@@ -22,7 +22,7 @@ async function mounted(ctx: Context, config: object) {
 }
 
 it('shares Host preparation across observers and does not cancel work when observation ends', async () => {
-  const ctx = new Context(), base = ctx.plugin(SpeechToText, { defaultProvider: 'sensevoice-local', language: 'auto' })
+  const ctx = new Context(), base = ctx.plugin(SpeechToText, { defaultProvider: 'local', language: 'auto' })
   await base
   try {
     const service = ctx.get('speechToText')!, id = 'local' as SpeechProviderId
@@ -36,7 +36,7 @@ it('shares Host preparation across observers and does not cancel work when obser
     service.prepare(id)
     expect(prepare).toHaveBeenCalledOnce()
     service.prepare(id, { downloadSource: 'https://mirror.example' })
-    expect(prepare).toHaveBeenLastCalledWith({ downloadSource: 'https://mirror.example' })
+    expect(prepare).toHaveBeenLastCalledWith('auto', { downloadSource: 'https://mirror.example' })
     const next = stream.next()
     state = { phase: 'downloading', resource: 'model', completedBytes: 638, totalBytes: 936 }; notify()
     expect((await next).value).toMatchObject({ providers: [{ preparation: state }] })
@@ -56,10 +56,10 @@ it('shares Host preparation across observers and does not cancel work when obser
 it('persists explicit provider and language changes through the profile and publishes them with readiness', async () => {
   const ctx = new Context()
   try {
-    const { speech, writes } = await mounted(ctx, { defaultProvider: 'sensevoice-local', language: 'auto' })
-    speech.register(provider('sensevoice-local')); speech.register(provider('cloud'))
+    const { speech, writes } = await mounted(ctx, { defaultProvider: 'local', language: 'auto' })
+    speech.register(provider('local')); speech.register(provider('cloud'))
     const stream = speech.follow(new AbortController().signal)[Symbol.asyncIterator]()
-    expect((await stream.next()).value).toMatchObject({ selection: { providerId: 'sensevoice-local', language: 'auto' } })
+    expect((await stream.next()).value).toMatchObject({ selection: { providerId: 'local', language: 'auto' } })
     const next = stream.next()
     await speech.configure({ providerId: 'cloud' as SpeechProviderId })
     expect((await next).value).toMatchObject({ selection: { providerId: 'cloud', language: 'auto' } })
@@ -87,7 +87,7 @@ it('refuses to configure without the settings service or a profile entry', async
 })
 
 it('ends waiting observers and rejects registration after service disposal', async () => {
-  const ctx = new Context(), base = ctx.plugin(SpeechToText, { defaultProvider: 'sensevoice-local', language: 'auto' })
+  const ctx = new Context(), base = ctx.plugin(SpeechToText, { defaultProvider: 'local', language: 'auto' })
   await base
   const service = ctx.get('speechToText')!, stream = service.follow(new AbortController().signal)[Symbol.asyncIterator]()
   await stream.next()
@@ -160,10 +160,10 @@ describe('speech providers', () => {
 
   it('removes a registration with its contributing fiber', async () => {
     const ctx = new Context()
-    const base = ctx.plugin(SpeechToText, { defaultProvider: 'sensevoice-local', language: 'auto' })
+    const base = ctx.plugin(SpeechToText, { defaultProvider: 'local', language: 'auto' })
     await base
     const fiber = ctx.inject(['speechToText'], (owner) => {
-      owner.effect(() => owner.speechToText.register(provider('sensevoice-local')))
+      owner.effect(() => owner.speechToText.register(provider('local')))
     })
     await fiber
     expect(ctx.get('speechToText')!.listProviders()).toHaveLength(1)

@@ -50,7 +50,7 @@ it('forwards an explicit download source to the registered preparation owner', a
   const api = new SpeechController(ctx, { maxAudioBytes: 32044, maxDurationSeconds: 1 })
   expect(api.catalog().providers[0]?.downloadSources).toEqual(['https://hf-mirror.com'])
   api.prepare(id, { downloadSource: 'https://hf-mirror.com' })
-  expect(prepare).toHaveBeenCalledWith({ downloadSource: 'https://hf-mirror.com' })
+  expect(prepare).toHaveBeenCalledWith('auto', { downloadSource: 'https://hf-mirror.com' })
 })
 
 it('rejects oversized, noncanonical, malformed and overlong audio without inference', async () => {

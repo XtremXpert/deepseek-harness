@@ -31,8 +31,8 @@ it('saves language and provider preferences without remounting and restores them
     })
     ctx = await start()
     const speech = ctx.get('speechToText')!
-    const languages = ['auto', 'zh', 'en', 'yue', 'ja', 'ko']
-    for (const id of ['sensevoice-local', 'another-provider']) speech.register({
+    const languages = ['auto', 'zh', 'en', 'yue', 'ja', 'ko', 'fr']
+    for (const id of ['local', 'another-provider']) speech.register({
       info: { id: id as SpeechProviderId, name: id, location: 'host-local', languages },
       transcribe: async () => { throw new Error('Changing preferences must not transcribe audio') },
     })
@@ -41,7 +41,7 @@ it('saves language and provider preferences without remounting and restores them
     const fiber = entry.fiber
     for (const language of [...languages, 'zh']) {
       await speech.configure({ language })
-      expect(speech.snapshot().selection).toEqual({ providerId: 'sensevoice-local', language })
+      expect(speech.snapshot().selection).toEqual({ providerId: 'local', language })
     }
     await speech.configure({ providerId: 'another-provider' as SpeechProviderId })
     expect(speech.snapshot().selection).toEqual({ providerId: 'another-provider', language: 'zh' })
